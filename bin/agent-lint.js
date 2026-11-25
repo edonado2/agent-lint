@@ -13,6 +13,14 @@ Flags:
   --version    print the version
 `;
 
+export function formatHuman(findings) {
+  return findings.map((f) => `${f.path}:${f.line}  ${f.rule}  ${f.message}\n`).join('');
+}
+
+export function formatJson(findings) {
+  return `${JSON.stringify(findings, null, 2)}\n`;
+}
+
 export function run(argv, stdout = process.stdout, stderr = process.stderr) {
   let json = false;
   let color = true;
@@ -34,9 +42,14 @@ export function run(argv, stdout = process.stdout, stderr = process.stderr) {
   }
 
   const root = positional[0] || process.cwd();
-  const findings = scan(root);
-  if (json) stdout.write(JSON.stringify(findings, null, 2) + '\n');
-  else for (const f of findings) stdout.write(`${f.path}:${f.line}  ${f.rule}  ${f.message}\n`);
+  let findings;
+  try {
+    findings = scan(root);
+  } catch (error) {
+    stderr.write(`cannot read ${root}: ${error.code || error.message}\n`);
+    return 2;
+  }
+  stdout.write(json ? formatJson(findings) : formatHuman(findings));
   return findings.length ? 1 : 0;
 }
 

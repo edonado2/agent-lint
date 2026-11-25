@@ -1,0 +1,20 @@
+{
+  "name": "agent-lint",
+  "version": "0.1.0",
+  "description": "Lint AI agent instruction files for stale paths, renamed scripts, broken links and malformed rules",
+  "type": "module",
+  "bin": {
+    "agent-lint": "bin/agent-lint.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edonado2/agent-lint.git"
+  }
+}

@@ -61,3 +61,35 @@ test('discovers all five instruction filenames including nested skills', (t) => 
     'skills/demo/SKILL.md',
   ]);
 });
+
+test('reports a broken relative link outside a fence, not inside one', (t) => {
+  const root = fixture({
+    'AGENTS.md': '[x](./nope.md)\n\n```\n[y](./also-nope.md)\n```\n',
+  }, t);
+  const found = scan(root).filter((f) => f.rule === 'broken-link');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].line, 1);
+});
+
+test('reports the same instruction line repeated in another file', (t) => {
+  const root = fixture({
+    'AGENTS.md': 'Always run the checks first.\n',
+    'CLAUDE.md': 'Always run the checks first.\n',
+  }, t);
+  const found = scan(root).filter((f) => f.rule === 'duplicate-rule');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].line, 1);
+  assert.equal(found[0].path, 'CLAUDE.md');
+});
+
+test('reports an unclosed code fence', (t) => {
+  const root = fixture({ 'AGENTS.md': '```\nsome code\n' }, t);
+  const found = scan(root).filter((f) => f.rule === 'unclosed-fence');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].line, 1);
+});
+
+test('accepts balanced code fences', (t) => {
+  const root = fixture({ 'AGENTS.md': '```\nsome code\n```\n' }, t);
+  assert.equal(scan(root).filter((f) => f.rule === 'unclosed-fence').length, 0);
+});
